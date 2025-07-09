@@ -27,4 +27,4 @@ migratedown:
   -database "postgresql://root:root@localhost:5432/simple_bank?sslmode=disable" \
  down
 
-.PHONY: postgres createdb deletedb
+.PHONY: postgres createdb deletedb migrateup migratedown stoppostgres removepostgres restartpostgres
