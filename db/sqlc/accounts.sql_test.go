@@ -9,17 +9,33 @@ import (
 	"context"
 	"testing"
 
+	"github.com/PHANTOM-HAWK/golang-practise/db/util"
 	"github.com/stretchr/testify/assert"
 )
+
+func CreateAccount(t *testing.T) Account {
+	ctx := context.Background()
+	arg := CreateAccountParams{
+		Owner:    util.RandomString(),
+		Balance:  int64(util.RandomAmount()),
+		Currency: util.RandomCurrency(),
+	}
+	q := testQueries
+	account, _ := q.CreateAccount(ctx, arg)
+	return account
+}
 
 func TestQueries_CreateAccount(t *testing.T) {
 	ctx := context.Background()
 	arg := CreateAccountParams{
-		Owner:    "test_owner",
-		Balance:  1000,
-		Currency: "USD",
+		Owner:    util.RandomString(),
+		Balance:  int64(util.RandomAmount()),
+		Currency: util.RandomCurrency(),
 	}
 	q := testQueries
-	err := q.CreateAccount(ctx, arg)
+	account, err := q.CreateAccount(ctx, arg)
+	assert.Equal(t, account.Balance, arg.Balance)
+	assert.Equal(t, arg.Owner, account.Owner)
 	assert.NoError(t, err)
+
 }

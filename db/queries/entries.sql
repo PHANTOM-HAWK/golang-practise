@@ -2,8 +2,10 @@
 SELECT * FROM entries
 WHERE id = $1 LIMIT 1;
 
--- name: CreateEntries :exec
-INSERT INTO entries (account_id,amount) VALUES ($1,$2);
+-- name: CreateEntries :one
+INSERT INTO entries (account_id, amount)
+VALUES ($1, $2)
+RETURNING *;
 
 -- name: UpdateEntries :exec
 UPDATE entries SET account_id = $2,amount = $3  
