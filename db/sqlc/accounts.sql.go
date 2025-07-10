@@ -10,16 +10,17 @@ import (
 )
 
 const createAccount = `-- name: CreateAccount :exec
-INSERT INTO accounts (owner,balance) VALUES ($1,$2)
+INSERT INTO accounts (owner,balance,currency) VALUES ($1,$2,$3)
 `
 
 type CreateAccountParams struct {
-	Owner   string
-	Balance int64
+	Owner    string
+	Balance  int64
+	Currency string
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) error {
-	_, err := q.db.ExecContext(ctx, createAccount, arg.Owner, arg.Balance)
+	_, err := q.db.ExecContext(ctx, createAccount, arg.Owner, arg.Balance, arg.Currency)
 	return err
 }
 
