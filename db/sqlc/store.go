@@ -68,27 +68,41 @@ func (s *store) TransferTx(ctx context.Context, arg TransferTxParams) (resultTra
 		if err != nil {
 			return err
 		}
-		//first get accounts for update then update account
-		fromAccount, err := q.GetAccountForUpdate(ctx, arg.FromAccountID)
-		if err != nil {
-			return err
-		}
-		result.FromAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{ID: fromAccount.ID, Balance: fromAccount.Balance - arg.Amount})
-		if err != nil {
-			return err
+		if arg.FromAccountID < arg.ToAccountID {
+			result.FromAccount, result.ToAccount, err = q.AddToAccount(ctx, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount)
+		} else {
+			result.ToAccount, result.FromAccount, err = q.AddToAccount(ctx, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount)
 		}
 
-		//2nd get to account and update it
-		toAccount, err := q.GetAccountForUpdate(ctx, arg.ToAccountID)
-		if err != nil {
-			return err
-		}
-		result.ToAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{ID: toAccount.ID, Balance: toAccount.Balance + arg.Amount})
-		if err != nil {
-			return err
-		}
+		// //first get accounts for update then update account
+		// fromAccount, err := q.GetAccountForUpdate(ctx, arg.FromAccountID)
+		// if err != nil {
+		// 	return err
+		// }
+		// result.FromAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{ID: fromAccount.ID, Balance: fromAccount.Balance - arg.Amount})
+		// if err != nil {
+		// 	return err
+		// }
+
+		// //2nd get to account and update it
+		// toAccount, err := q.GetAccountForUpdate(ctx, arg.ToAccountID)
+		// if err != nil {
+		// 	return err
+		// }
+		// result.ToAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{ID: toAccount.ID, Balance: toAccount.Balance + arg.Amount})
+		// if err != nil {
+		// 	return err
+		// }
 		return nil
 	})
 
 	return result, err
+}
+
+func (q *Queries) AddToAccount(ctx context.Context, account1 int64, amount1 int64, account2 int64, amount2 int64) (Account, Account, error) {
+	account1ForUpdate, err := q.GetAccountForUpdate(ctx, account1)
+	account2ForUpdate, err := q.GetAccountForUpdate(ctx, account2)
+	retAccount1, err := q.UpdateAccount(ctx, UpdateAccountParams{ID: account1ForUpdate.ID, Balance: account1ForUpdate.Balance + amount1})
+	retAccount2, err := q.UpdateAccount(ctx, UpdateAccountParams{ID: account2ForUpdate.ID, Balance: account2ForUpdate.Balance + amount2})
+	return retAccount1, retAccount2, err
 }

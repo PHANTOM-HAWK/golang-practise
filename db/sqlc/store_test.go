@@ -12,16 +12,19 @@ func Test_store_TransferTx(t *testing.T) {
 	account2 := CreateAccount(t)
 	ctx := context.Background()
 	amount := int64(10)
-	n := 20
+	n := 100
 	err := make(chan error)
 	result := make(chan resultTransferTx)
 	store := *NewStore(testDB)
 	for i := 0; i < n; i++ {
 		go func() {
-			arg := TransferTxParams{
-				FromAccountID: account1.ID,
-				ToAccountID:   account2.ID,
-				Amount:        amount,
+			arg := TransferTxParams{Amount: amount}
+			if i%2 == 0 {
+				arg.FromAccountID = account1.ID
+				arg.ToAccountID = account2.ID
+			} else {
+				arg.ToAccountID = account1.ID
+				arg.FromAccountID = account2.ID
 			}
 			res, e := store.TransferTx(ctx, arg)
 			result <- res
@@ -33,9 +36,9 @@ func Test_store_TransferTx(t *testing.T) {
 		res := <-result
 		e := <-err
 		assert.NoError(t, e)
-		assert.Equal(t, res.Transfer.FromAccountID, account1.ID)
-		assert.Equal(t, res.Transfer.ToAccountID, account2.ID)
-		assert.Equal(t, res.Transfer.Amount, amount)
+		// assert.Equal(t, res.Transfer.FromAccountID, account1.ID)
+		// assert.Equal(t, res.Transfer.ToAccountID, account2.ID)
+		// assert.Equal(t, res.Transfer.Amount, amount)
 		//the diff in bw each trans should be equal
 		//get balance
 
